@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">SyncClipboard</string>
+    <string name="app_description">一个SyncClipboard的demo</string>
+    <string name="upload_description">在LSPosed中勾选需要生效的APP后即开启上传</string>
+    <string name="receive_description">SyncCliboard挂在后台即可监听下载</string>
+    <string name="button_receive">开启从云端上同步</string>
+    <string name="button_send">开启本地上传</string>
+    <string name="xposed_description">剪切板同步</string>
+    <string-array name="scope">
+        <item>android</item>
+    </string-array>
+</resources>
