@@ -7,7 +7,7 @@ Android8-11
 
 ## 说明
 
-剪切板同步依赖于Redis的Pub/Sub机制，所以需要配置公网的Redis后再打包出APK，具体方式为Fork本仓库，在Github-Setting-Secret中配置四个值
+剪切板同步依赖于Redis的Pub/Sub机制，所以需要配置公网的Redis后再打包出APK，具体方式为Fork本仓库后**转为私有仓库**，在Github-Setting-Secret中配置四个值
 ```
 DEVICETOKEN
 
@@ -43,4 +43,8 @@ TOPICKEY
 
 - 务必配置好Redis密码，Redis版本保持最新，避免黑客利用
 - Topic的存在使得这个程序支持多用户，但并不推荐多用户共用一个Redis
+
+
+## 其它平台客户端
+[SyncClipboard-Go](https://github.com/Dawnnnnnn/SyncClipboard-Go)
 
