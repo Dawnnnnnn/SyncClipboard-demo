@@ -12,7 +12,9 @@
         android:theme="@style/Theme.SyncClipboard" >
         <activity
             android:name=".MainActivity"
-            android:exported="true" >
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:taskAffinity=":splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
