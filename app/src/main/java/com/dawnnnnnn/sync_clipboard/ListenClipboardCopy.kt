@@ -28,6 +28,7 @@ val deviceToken: String? = System.getenv("deviceToken")
 val topicKey: String? = System.getenv("topicKey")
 
 const val PackageName = BuildConfig.APPLICATION_ID
+var flag = false
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,7 +39,7 @@ class MainActivity : AppCompatActivity() {
 
 
 object RedisUtils {
-    const val TAG = "RedisUtils"
+    private const val TAG = "RedisUtils"
     private var redissonClient: RedissonClient? = null
 
     @Synchronized
@@ -50,7 +51,7 @@ object RedisUtils {
         return Redisson.create(config)
     }
 
-    fun initClient() {
+    private fun initClient() {
         try {
             redissonClient = redisson()
         } catch (e: Exception) {
@@ -71,9 +72,10 @@ object RedisUtils {
         }
         return try {
             val result = redissonClient!!.getTopic(topic).publish(message)
+            redissonClient!!.shutdown()
             Log.i(
-                TAG, "redis publish success, topic = [" + topic + "], " +
-                        "message = [" + message + "], [ " + result + " ] client received it"
+                TAG,
+                "redis publish success, topic = [$topic], message = [$message], [ $result ] client received it"
             )
             result
         } catch (e: Exception) {
@@ -142,26 +144,31 @@ class ListenClipboardCopy : IXposedHookLoadPackage {
                     deviceToken
                 )
             if (topicKey != null) {
-                RedisUtils.publishTopic(topicKey, pushJson)
+                if (!flag) {
+                    RedisUtils.publishTopic(topicKey, pushJson)
+                }
             }
         }
     }
 
     override fun handleLoadPackage(loadPackageParam: LoadPackageParam?) {
         if (loadPackageParam?.packageName.equals(PackageName)) {
-            RedisUtils.subscribeTopic(topicKey, object : MessageListener<String> {
-                override fun onMessage(channel: CharSequence, msg: String) {
-                    val jsonObject = JSONObject(msg)
-                    val jsonMsg = jsonObject.getString("msg")
-                    val jsonDeviceToken = jsonObject.getString("uuid")
-                    if (jsonDeviceToken != deviceToken) {
-                        val decodedBytes = Base64.getDecoder().decode(jsonMsg)
-                        val decodedString = String(decodedBytes)
-                        val context = AndroidAppHelper.currentApplication().applicationContext
-                        ClipboardHelper.put(context, decodedString)
-                    }
+            RedisUtils.subscribeTopic(
+                topicKey
+            ) { _, msg ->
+                val jsonObject = JSONObject(msg)
+                val jsonMsg = jsonObject.getString("msg")
+                val jsonDeviceToken = jsonObject.getString("uuid")
+                if (jsonDeviceToken != deviceToken) {
+                    val decodedBytes = Base64.getDecoder().decode(jsonMsg)
+                    val decodedString = String(decodedBytes)
+                    val context = AndroidAppHelper.currentApplication().applicationContext
+                    ClipboardHelper.put(context, decodedString)
+                    flag = true
+                    Thread.sleep(1000)
+                    flag = false
                 }
-            })
+            }
         }
         XposedHelpers.findAndHookMethod(
             ClipboardManager::class.java, "setPrimaryClip",
