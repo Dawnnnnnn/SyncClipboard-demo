@@ -59,9 +59,7 @@ object RedisUtils {
     }
 
     fun publishTopic(topic: String, message: String): Long? {
-        if (redissonClient == null) {
-            initClient()
-        }
+        initClient()
         if (redissonClient == null) {
             Log.w(
                 TAG,
@@ -71,7 +69,7 @@ object RedisUtils {
         }
         return try {
             val result = redissonClient!!.getTopic(topic).publish(message)
-            redissonClient!!.shutdown()
+
             Log.i(
                 TAG,
                 "redis publish success, topic = [$topic], message = [$message], [ $result ] client received it"
@@ -83,6 +81,8 @@ object RedisUtils {
                 "redis publish error, topic = [$topic], message = [$message]", e
             )
             -1L
+        } finally {
+            redissonClient!!.shutdown()
         }
     }
 
