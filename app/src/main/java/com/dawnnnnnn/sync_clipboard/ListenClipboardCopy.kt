@@ -28,7 +28,6 @@ val deviceToken: String? = System.getenv("deviceToken")
 val topicKey: String? = System.getenv("topicKey")
 
 const val PackageName = BuildConfig.APPLICATION_ID
-var flag = false
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -144,9 +143,7 @@ class ListenClipboardCopy : IXposedHookLoadPackage {
                     deviceToken
                 )
             if (topicKey != null) {
-                if (!flag) {
-                    RedisUtils.publishTopic(topicKey, pushJson)
-                }
+                RedisUtils.publishTopic(topicKey, pushJson)
             }
         }
     }
@@ -164,9 +161,6 @@ class ListenClipboardCopy : IXposedHookLoadPackage {
                     val decodedString = String(decodedBytes)
                     val context = AndroidAppHelper.currentApplication().applicationContext
                     ClipboardHelper.put(context, decodedString)
-                    flag = true
-                    Thread.sleep(1000)
-                    flag = false
                 }
             }
         }
